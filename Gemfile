@@ -5,3 +5,4 @@ gem 'tilt', '~> 1.4.1'
 gem "sinatra"
 gem "thin"
 gem "rack"
+gem 'foreman'

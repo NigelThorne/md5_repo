@@ -19,20 +19,43 @@ class Md5Repo < Sinatra::Base
   end
   
   get '/' do
-    return """
-    <html><body><form action=\"/files\" method=\"post\" enctype=\"multipart/form-data\">
-    <input type='file' name=\"file\"></input><input type='submit' value=\"Send\"></input></form></body>
-    </html>
     """
+    <html><body>
+    <h1>Upload</h1>
+    <form action='/files' method='post' enctype='multipart/form-data'>
+    <input type='file' name=\"file\" />
+    <input type='submit' value='Send'></input>
+    </form>
+    <!-- TODO: Fix this download form... javascript should update the action based on the md5 value -->
+    <h1>Download</h1>
+    <form action='/files/xxx' method='get' >
+    <input type='text' name='md5'></input>
+    <input type='submit' value='Send'></input>
+    </form>
+    </body></html>
+    """
+  end
+
+  delete '/files/:md5' do |md5|
+    # MAYDO:  Remove any subfolders that are now empty.
+    pathname = path(md5)
+    FileUtils.rmtree(pathname)
+    "ok"
   end
   
   post '/files' do
     tempfile = params['file'][:tempfile]
     filename = params['file'][:filename]
     md5 = Digest::MD5.file(tempfile.path).hexdigest 
-    FileUtils.mkpath path(md5)
+    pathname = path(md5)
+
+    FileUtils.mkpath pathname
     if Dir["#{pathname}/*"].empty?
+      # store document
       FileUtils.cp(tempfile.path, "#{path(md5)}/#{filename}")
+    else
+      # rename document
+      File.rename(Dir["#{pathname}/*"][0], "#{path(md5)}/#{filename}")
     end
     return md5
   end
