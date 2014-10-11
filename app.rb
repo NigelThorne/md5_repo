@@ -10,7 +10,6 @@ class Md5Repo < Sinatra::Base
     filename = files[0]
     puts filename
     if (filename)
-#      content_type 'application/octet-stream'
       send_file filename, disposition:"attachment", filename:File.basename(filename), type:'Application/octet-stream'
     else
       status 404
@@ -23,12 +22,19 @@ class Md5Repo < Sinatra::Base
     <html><body>
     <h1>Upload</h1>
     <form action='/files' method='post' enctype='multipart/form-data'>
-    <input type='file' name=\"file\" />
+    <input type='file' name='file' />
+    <input type='submit' value='Send'></input>
+    </form>
+    <h1>Upload</h1>
+    <form action='/files' method='post' enctype='multipart/form-data'>
+    <input type='text' name='filename' /><br/>
+    
+    <textarea name='body' rows='20' cols='80'></textarea>
     <input type='submit' value='Send'></input>
     </form>
     <!-- TODO: Fix this download form... javascript should update the action based on the md5 value -->
     <h1>Download</h1>
-    <form action='/files/xxx' method='get' >
+    <form action='#' method='get' >
     <input type='text' name='md5'></input>
     <input type='submit' value='Send'></input>
     </form>
@@ -42,25 +48,39 @@ class Md5Repo < Sinatra::Base
     FileUtils.rmtree(pathname)
     "ok"
   end
-  
-  post '/files' do
-    tempfile = params['file'][:tempfile]
-    filename = params['file'][:filename]
-    md5 = Digest::MD5.file(tempfile.path).hexdigest 
-    pathname = path(md5)
 
-    FileUtils.mkpath pathname
-    if Dir["#{pathname}/*"].empty?
-      # store document
-      FileUtils.cp(tempfile.path, "#{path(md5)}/#{filename}")
+  post '/files' do
+    if params['file']
+      tempfile = params['file'][:tempfile]
+      filename = params['file'][:filename]
+      store(tempfile.path, filename)
     else
-      # rename document
-      File.rename(Dir["#{pathname}/*"][0], "#{path(md5)}/#{filename}")
+      content = params['body']
+      filename = params['filename']
+      tempfile = Tempfile.new filename #MAYDO : bit wasteful to write to file twice...
+      tempfile.write content
+      tempfile.close
+      store(tempfile.path, filename)		
     end
-    return md5
   end
   
   def path(md5)
     File.expand_path("../repo/#{md5[0..4]}/#{md5[5..9]}/#{md5}", __FILE__)
   end
+
+	def store(tempfile,filename)
+		md5 = Digest::MD5.file(tempfile).hexdigest 
+		pathname = path(md5)
+
+		FileUtils.mkpath pathname
+		if Dir["#{pathname}/*"].empty?
+		  # store document
+		  FileUtils.cp(tempfile, "#{path(md5)}/#{filename}")
+		else
+		  # rename document
+		  File.rename(Dir["#{pathname}/*"][0], "#{path(md5)}/#{filename}")
+		end
+		md5
+	end
+  
 end

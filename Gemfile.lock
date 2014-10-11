@@ -5,6 +5,7 @@ GEM
     dotenv (0.11.1)
       dotenv-deployment (~> 0.0.2)
     dotenv-deployment (0.0.2)
+    eventmachine (1.0.3)
     eventmachine (1.0.3-x86-mingw32)
     foreman (0.75.0)
       dotenv (~> 0.11.1)
@@ -24,6 +25,7 @@ GEM
     tilt (1.4.1)
 
 PLATFORMS
+  x64-mingw32
   x86-mingw32
 
 DEPENDENCIES
