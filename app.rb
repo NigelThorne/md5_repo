@@ -1,8 +1,14 @@
 require 'fileutils'
 
+#todo: https://github.com/britg/sinatra-cross_origin
+
 class Md5Repo < Sinatra::Base
   reset!
   use Rack::Reloader
+  
+  before do
+    response['Access-Control-Allow-Origin'] = 'http://aumel-constash:8090'
+  end
   
   get '/files/:md5' do |md5|
     pathname = path(md5)
