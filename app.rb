@@ -1,5 +1,7 @@
 require 'fileutils'
 
+require 'sinatra/cross_origin'
+
 #todo: https://github.com/britg/sinatra-cross_origin
 
 class Md5Repo < Sinatra::Base
@@ -8,6 +10,9 @@ class Md5Repo < Sinatra::Base
   
   before do
     response['Access-Control-Allow-Origin'] = 'http://aumel-constash:8090'
+  end
+  configure do
+    enable :cross_origin
   end
   
   get '/files/:md5' do |md5|
