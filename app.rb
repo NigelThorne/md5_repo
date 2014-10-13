@@ -53,22 +53,30 @@ class Md5Repo < Sinatra::Base
     if params['file']
       tempfile = params['file'][:tempfile]
       filename = params['file'][:filename]
-      store(tempfile.path, filename)
-    else
-      content = params['body']
-      filename = params['filename']
-      tempfile = Tempfile.new filename #MAYDO : bit wasteful to write to file twice...
-      tempfile.write content
-      tempfile.close
-      store(tempfile.path, filename)		
+      return store(tempfile.path, filename)
     end
+
+    filename = params['filename']
+    if filename.empty? 
+      status 400
+      return "oops - no filename"
+    end
+
+    content = params['body']
+    tempfile = Tempfile.new filename #MAYDO : bit wasteful to write to file twice...
+    tempfile.write content
+    tempfile.close
+    return store(tempfile.path, filename)		
+
   end
   
   def path(md5)
     File.expand_path("../repo/#{md5[0..4]}/#{md5[5..9]}/#{md5}", __FILE__)
   end
 
-	def store(tempfile,filename)
+	# save file
+  # or rename file is file exists and names don't match
+  def store(tempfile,filename)
 		md5 = Digest::MD5.file(tempfile).hexdigest 
 		pathname = path(md5)
 
