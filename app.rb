@@ -7,13 +7,25 @@ require 'sinatra/cross_origin'
 class Md5Repo < Sinatra::Base
   reset!
   use Rack::Reloader
+
   
   before do
-    response['Access-Control-Allow-Origin'] = 'http://aumel-constash:8090'
+     content_type  = 'text/plain'
+     headers  'Access-Control-Allow-Origin' => '*', 
+              'Access-Control-Allow-Methods' => ['OPTIONS', 'GET', 'POST'],
+              'Access-Control-Allow-Headers' => 'Content-Type'              
   end
-  configure do
-    enable :cross_origin
-  end
+
+  set :protection, false
+  
+  
+#  enable :cross_origin
+  
+#  set :allow_origin, :any
+#  set :allow_methods, [:get, :post, :options]
+#  set :allow_credentials, true
+#  set :max_age, "1728000"
+#  set :expose_headers, ['Content-Type']
   
   get '/files/:md5' do |md5|
     pathname = path(md5)
