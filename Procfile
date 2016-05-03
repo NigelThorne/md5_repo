@@ -1,1 +1,1 @@
-web: bundle exec rackup -p 4000
+web: rackup -p 4000

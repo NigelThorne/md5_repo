@@ -1,8 +1,16 @@
-FROM octohost/ruby-2.0
+FROM google/ruby
 
-ADD . /srv/www
-RUN cd /srv/www; bundle install --deployment --without test development
+ADD Gemfile /app/Gemfile
+ADD Gemfile.lock /app/Gemfile.lock
 
-EXPOSE 4000
+WORKDIR /app
 
-CMD ["/usr/local/bin/foreman","start","-d","/srv/www"]
+RUN ["/usr/bin/bundle", "install", "--deployment"]
+ADD . /app
+
+EXPOSE 8080
+CMD []
+ENV APPSERVER webrick
+ENV RACK_ENV production
+ENTRYPOINT /usr/bin/bundle exec rackup \
+    -p 8080 /app/config.ru -s $APPSERVER -E $RACK_ENV

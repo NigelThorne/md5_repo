@@ -5,8 +5,8 @@ require 'sinatra/cross_origin'
 #todo: https://github.com/britg/sinatra-cross_origin
 
 class Md5Repo < Sinatra::Base
-  reset!
-  use Rack::Reloader
+#  reset!
+#  use Rack::Reloader
 
   
   before do
@@ -28,6 +28,14 @@ class Md5Repo < Sinatra::Base
 #  set :expose_headers, ['Content-Type']
   
   get '/files/:md5' do |md5|
+    download(md5)
+  end
+
+  get '/files' do 
+    download(params["md5"])
+  end
+
+  def download(md5)
     pathname = path(md5)
     files = Dir["#{pathname}/*"]
     filename = files[0]
@@ -57,7 +65,7 @@ class Md5Repo < Sinatra::Base
     </form>
     <!-- TODO: Fix this download form... javascript should update the action based on the md5 value -->
     <h1>Download</h1>
-    <form action='#' method='get' >
+    <form action='/files' method='get' >
     <input type='text' name='md5'></input>
     <input type='submit' value='Send'></input>
     </form>
@@ -103,7 +111,9 @@ class Md5Repo < Sinatra::Base
 		md5 = Digest::MD5.file(tempfile).hexdigest 
 		pathname = path(md5)
 
+    puts "make folder #{pathname}"
 		FileUtils.mkpath pathname
+    puts "done"
 		if Dir["#{pathname}/*"].empty?
 		  # store document
 		  FileUtils.cp(tempfile, "#{path(md5)}/#{filename}")
